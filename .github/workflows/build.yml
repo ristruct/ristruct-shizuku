@@ -32,25 +32,29 @@ jobs:
           echo "BT_DIR=$ANDROID_HOME/build-tools/${BUILD_TOOLS}" >> "$GITHUB_ENV"
           echo "ANDROID_JAR=$ANDROID_HOME/platforms/${ANDROID_PLATFORM}/android.jar" >> "$GITHUB_ENV"
 
-      - name: Fetch Shizuku API + Provider jars
+      - name: Fetch Shizuku API + Provider AARs and extract classes.jar
         run: |
           mkdir -p deps
           cd deps
-          curl -sSL -o shizuku-api.jar \
-            "https://repo1.maven.org/maven2/dev/rikka/shizuku/api/${SHIZUKU_VERSION}/api-${SHIZUKU_VERSION}.jar"
-          curl -sSL -o shizuku-provider.aar \
-            "https://repo1.maven.org/maven2/dev/rikka/shizuku/provider/${SHIZUKU_VERSION}/provider-${SHIZUKU_VERSION}.aar"
-          curl -sSL -o shizuku-shared.jar \
-            "https://repo1.maven.org/maven2/dev/rikka/shizuku/shared/${SHIZUKU_VERSION}/shared-${SHIZUKU_VERSION}.jar"
-          unzip -o shizuku-provider.aar classes.jar -d provider_extracted
-          mv provider_extracted/classes.jar shizuku-provider.jar
+          # All Shizuku artifacts are published as .aar, not .jar - the classes
+          # live inside each aar as an embedded classes.jar.
+          for artifact in aidl shared api provider; do
+            curl -fsSL -o "${artifact}.aar" \
+              "https://repo1.maven.org/maven2/dev/rikka/shizuku/${artifact}/${SHIZUKU_VERSION}/${artifact}-${SHIZUKU_VERSION}.aar"
+            unzip -o "${artifact}.aar" classes.jar -d "${artifact}_extracted"
+            mv "${artifact}_extracted/classes.jar" "shizuku-${artifact}.jar"
+          done
+          # Fail loudly here instead of producing a cryptic javac error later.
+          for f in shizuku-aidl.jar shizuku-shared.jar shizuku-api.jar shizuku-provider.jar; do
+            unzip -tq "$f" > /dev/null || { echo "::error::$f is not a valid jar - download failed"; exit 1; }
+          done
 
       - name: Compile Java sources
         run: |
           mkdir -p build/classes
           find src -name "*.java" > sources.txt
           javac -source 8 -target 8 \
-            -classpath "$ANDROID_JAR:deps/shizuku-api.jar:deps/shizuku-provider.jar:deps/shizuku-shared.jar" \
+            -classpath "$ANDROID_JAR:deps/shizuku-aidl.jar:deps/shizuku-shared.jar:deps/shizuku-api.jar:deps/shizuku-provider.jar" \
             -d build/classes \
             @sources.txt
 
@@ -59,9 +63,10 @@ jobs:
           mkdir -p build/merged
           cp -r build/classes/* build/merged/
           cd build/merged
+          jar xf ../../deps/shizuku-aidl.jar
+          jar xf ../../deps/shizuku-shared.jar
           jar xf ../../deps/shizuku-api.jar
           jar xf ../../deps/shizuku-provider.jar
-          jar xf ../../deps/shizuku-shared.jar
           rm -rf META-INF
           cd ../..
           jar cf build/classes.jar -C build/merged .
