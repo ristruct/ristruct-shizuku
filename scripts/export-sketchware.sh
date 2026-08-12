@@ -10,20 +10,28 @@ WORK="$OUT_ROOT/.work"
 rm -rf "$OUT_ROOT"
 mkdir -p "$OUT" "$WORK" "$WORK/classes-fat" "$OUT/res"
 
-fetch_aar() {
+fetch_artifact() {
   local group="$1"
   local artifact="$2"
   local version="$3"
   local base="$4"
-  local url="$base/$group/$artifact/$version/$artifact-$version.aar"
-  local out="$WORK/$artifact.aar"
-  curl --fail --silent --show-error --location --retry 3 --retry-delay 1 "$url" -o "$out"
-  unzip -q -o "$out" -d "$WORK/$artifact"
-  if [ -f "$WORK/$artifact/classes.jar" ]; then
-    unzip -q -o "$WORK/$artifact/classes.jar" -d "$WORK/classes-fat"
-  fi
-  if [ -d "$WORK/$artifact/res" ]; then
-    cp -R "$WORK/$artifact/res/." "$OUT/res/"
+  local aar_url="$base/$group/$artifact/$version/$artifact-$version.aar"
+  local jar_url="$base/$group/$artifact/$version/$artifact-$version.jar"
+  local aar_out="$WORK/$artifact.aar"
+
+  if curl --fail --silent --show-error --location --retry 3 --retry-delay 1 "$aar_url" -o "$aar_out"; then
+    unzip -q -o "$aar_out" -d "$WORK/$artifact"
+    if [ -f "$WORK/$artifact/classes.jar" ]; then
+      unzip -q -o "$WORK/$artifact/classes.jar" -d "$WORK/classes-fat"
+    fi
+    if [ -d "$WORK/$artifact/res" ]; then
+      cp -R "$WORK/$artifact/res/." "$OUT/res/"
+    fi
+  else
+    # Not published as .aar (e.g. androidx.annotation is a plain .jar) - fall back.
+    local jar_out="$WORK/$artifact.jar"
+    curl --fail --silent --show-error --location --retry 3 --retry-delay 1 "$jar_url" -o "$jar_out"
+    unzip -q -o "$jar_out" -d "$WORK/classes-fat"
   fi
 }
 
@@ -32,17 +40,18 @@ gradle :library:assembleRelease --no-daemon --stacktrace
 
 # Include the Shizuku runtime/API into the Sketchware package so the consumer
 # can use RistructShizuku from Add source directly without adding Maven deps.
-fetch_aar "dev/rikka/shizuku" "api" "$VERSION" "https://repo1.maven.org/maven2"
-fetch_aar "dev/rikka/shizuku" "provider" "$VERSION" "https://repo1.maven.org/maven2"
-fetch_aar "dev/rikka/shizuku" "shared" "$VERSION" "https://repo1.maven.org/maven2"
-fetch_aar "dev/rikka/shizuku" "aidl" "$VERSION" "https://repo1.maven.org/maven2"
-fetch_aar "androidx/annotation" "annotation" "$ANNOTATION_VERSION" "https://repo1.maven.org/maven2"
+fetch_artifact "dev/rikka/shizuku" "api" "$VERSION" "https://repo1.maven.org/maven2"
+fetch_artifact "dev/rikka/shizuku" "provider" "$VERSION" "https://repo1.maven.org/maven2"
+fetch_artifact "dev/rikka/shizuku" "shared" "$VERSION" "https://repo1.maven.org/maven2"
+fetch_artifact "dev/rikka/shizuku" "aidl" "$VERSION" "https://repo1.maven.org/maven2"
+fetch_artifact "androidx/annotation" "annotation" "$ANNOTATION_VERSION" "https://repo1.maven.org/maven2"
 
 # Merge our compiled classes.
 unzip -q -o library/build/outputs/aar/library-release.aar -d "$WORK/ours"
 unzip -q -o "$WORK/ours/classes.jar" -d "$WORK/classes-fat"
 
 rm -rf "$WORK/classes-fat/META-INF"
+find "$WORK/classes-fat" -name "module-info.class" -delete
 (cd "$WORK/classes-fat" && jar cf "$OUT/classes.jar" .)
 
 ANDROID_JAR="$ANDROID_HOME/platforms/android-34/android.jar"
