@@ -122,15 +122,20 @@ public final class RistructUserService extends IRistructUserService.Stub {
     }
 
     @Override
+    public void destroy() throws RemoteException {
+        shutdown();
+    }
+
+    @Override
     public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         if (code == DESTROY_TRANSACTION) {
-            destroy();
+            shutdown();
             return true;
         }
         return super.onTransact(code, data, reply, flags);
     }
 
-    private void destroy() {
+    private void shutdown() {
         System.exit(0);
     }
 

@@ -19,6 +19,7 @@ android {
 
     buildFeatures {
         buildConfig = false
+        aidl = true
     }
 
     lint {
