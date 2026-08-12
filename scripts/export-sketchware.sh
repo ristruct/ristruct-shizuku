@@ -14,25 +14,32 @@ fetch_artifact() {
   local group="$1"
   local artifact="$2"
   local version="$3"
-  local base="$4"
-  local aar_url="$base/$group/$artifact/$version/$artifact-$version.aar"
-  local jar_url="$base/$group/$artifact/$version/$artifact-$version.jar"
-  local aar_out="$WORK/$artifact.aar"
+  local repos=("https://repo1.maven.org/maven2" "https://dl.google.com/android/maven2")
 
-  if curl --fail --silent --show-error --location --retry 3 --retry-delay 1 "$aar_url" -o "$aar_out"; then
-    unzip -q -o "$aar_out" -d "$WORK/$artifact"
-    if [ -f "$WORK/$artifact/classes.jar" ]; then
-      unzip -q -o "$WORK/$artifact/classes.jar" -d "$WORK/classes-fat"
+  for base in "${repos[@]}"; do
+    local aar_url="$base/$group/$artifact/$version/$artifact-$version.aar"
+    local aar_out="$WORK/$artifact.aar"
+    if curl --fail --silent --show-error --location --retry 3 --retry-delay 1 "$aar_url" -o "$aar_out" 2>/dev/null; then
+      unzip -q -o "$aar_out" -d "$WORK/$artifact"
+      if [ -f "$WORK/$artifact/classes.jar" ]; then
+        unzip -q -o "$WORK/$artifact/classes.jar" -d "$WORK/classes-fat"
+      fi
+      if [ -d "$WORK/$artifact/res" ]; then
+        cp -R "$WORK/$artifact/res/." "$OUT/res/"
+      fi
+      return 0
     fi
-    if [ -d "$WORK/$artifact/res" ]; then
-      cp -R "$WORK/$artifact/res/." "$OUT/res/"
-    fi
-  else
-    # Not published as .aar (e.g. androidx.annotation is a plain .jar) - fall back.
+
+    local jar_url="$base/$group/$artifact/$version/$artifact-$version.jar"
     local jar_out="$WORK/$artifact.jar"
-    curl --fail --silent --show-error --location --retry 3 --retry-delay 1 "$jar_url" -o "$jar_out"
-    unzip -q -o "$jar_out" -d "$WORK/classes-fat"
-  fi
+    if curl --fail --silent --show-error --location --retry 3 --retry-delay 1 "$jar_url" -o "$jar_out" 2>/dev/null; then
+      unzip -q -o "$jar_out" -d "$WORK/classes-fat"
+      return 0
+    fi
+  done
+
+  echo "ERROR: could not fetch $group:$artifact:$version (.aar or .jar) from any known repo" >&2
+  return 1
 }
 
 # Build our library first.
@@ -40,11 +47,11 @@ gradle :library:assembleRelease --no-daemon --stacktrace
 
 # Include the Shizuku runtime/API into the Sketchware package so the consumer
 # can use RistructShizuku from Add source directly without adding Maven deps.
-fetch_artifact "dev/rikka/shizuku" "api" "$VERSION" "https://repo1.maven.org/maven2"
-fetch_artifact "dev/rikka/shizuku" "provider" "$VERSION" "https://repo1.maven.org/maven2"
-fetch_artifact "dev/rikka/shizuku" "shared" "$VERSION" "https://repo1.maven.org/maven2"
-fetch_artifact "dev/rikka/shizuku" "aidl" "$VERSION" "https://repo1.maven.org/maven2"
-fetch_artifact "androidx/annotation" "annotation" "$ANNOTATION_VERSION" "https://repo1.maven.org/maven2"
+fetch_artifact "dev/rikka/shizuku" "api" "$VERSION"
+fetch_artifact "dev/rikka/shizuku" "provider" "$VERSION"
+fetch_artifact "dev/rikka/shizuku" "shared" "$VERSION"
+fetch_artifact "dev/rikka/shizuku" "aidl" "$VERSION"
+fetch_artifact "androidx/annotation" "annotation" "$ANNOTATION_VERSION"
 
 # Merge our compiled classes.
 unzip -q -o library/build/outputs/aar/library-release.aar -d "$WORK/ours"
