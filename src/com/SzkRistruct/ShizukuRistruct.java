@@ -30,6 +30,7 @@ public class ShizukuRistruct {
     public ShizukuRistruct(Activity activity) {
         this.activity = activity;
         this.context = activity;
+        ShizukuPermissionHelper.ensureRegistered();
     }
 
     public ShizukuRistruct(Context context) {
@@ -37,6 +38,7 @@ public class ShizukuRistruct {
         if (context instanceof Activity) {
             this.activity = (Activity) context;
         }
+        ShizukuPermissionHelper.ensureRegistered();
     }
 
     // ---------------- Shizuku permission & status ----------------
@@ -86,6 +88,16 @@ public class ShizukuRistruct {
     /** All-in-one readiness check: app installed, service running, permission granted. */
     public boolean ensureShizukuReady() {
         return isShizukuInstalled() && isShizukuAvailable() && hasPermission();
+    }
+
+    /** True once the user has answered the Shizuku permission dialog at least once this run. */
+    public boolean hasPermissionResult() {
+        return ShizukuPermissionHelper.hasResult();
+    }
+
+    /** Result of the most recent permission prompt. Use after requestPermission() + the user returning to your app. */
+    public boolean wasPermissionGranted() {
+        return ShizukuPermissionHelper.wasLastResultGranted();
     }
 
     public void destroy() {

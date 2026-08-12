@@ -458,5 +458,25 @@
     "palette": "9",
     "type": "b",
     "spec": "%m.ShizukuRistruct Uninstall package %s"
+  },
+  {
+    "code": "%1$s.hasPermissionResult()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "has_permission_result",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Has the permission dialog been answered yet"
+  },
+  {
+    "code": "%1$s.wasPermissionGranted()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "was_permission_granted",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Was the last permission request granted"
   }
 ]

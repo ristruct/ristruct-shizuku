@@ -2,7 +2,7 @@
   {
     "defineAdditionalVar": "",
     "varName": "ShizukuRistruct",
-    "imports": "com.SzkRistruct.ShizukuRistruct\nrikka.shizuku.Shizuku\ncom.SzkRistruct.ShizukuShell",
+    "imports": "com.SzkRistruct.ShizukuRistruct\nrikka.shizuku.Shizuku\ncom.SzkRistruct.ShizukuShell\ncom.SzkRistruct.ShizukuPermissionHelper",
     "name": "ShizukuRistruct 13.6.2",
     "typeName": "ShizukuRistruct",
     "icon": "2131165918",
