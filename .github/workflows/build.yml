@@ -1,0 +1,87 @@
+name: Build Sketchware Pro Shizuku Library
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_PLATFORM: android-34
+      BUILD_TOOLS: 34.0.0
+      SHIZUKU_VERSION: 13.1.5
+      LIB_NAME: "ShizukuRistruct 13.6.2"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform + build-tools
+        run: |
+          sdkmanager "platforms;${ANDROID_PLATFORM}" "build-tools;${BUILD_TOOLS}"
+          echo "BT_DIR=$ANDROID_HOME/build-tools/${BUILD_TOOLS}" >> "$GITHUB_ENV"
+          echo "ANDROID_JAR=$ANDROID_HOME/platforms/${ANDROID_PLATFORM}/android.jar" >> "$GITHUB_ENV"
+
+      - name: Fetch Shizuku API + Provider jars
+        run: |
+          mkdir -p deps
+          cd deps
+          curl -sSL -o shizuku-api.jar \
+            "https://repo1.maven.org/maven2/dev/rikka/shizuku/api/${SHIZUKU_VERSION}/api-${SHIZUKU_VERSION}.jar"
+          curl -sSL -o shizuku-provider.aar \
+            "https://repo1.maven.org/maven2/dev/rikka/shizuku/provider/${SHIZUKU_VERSION}/provider-${SHIZUKU_VERSION}.aar"
+          curl -sSL -o shizuku-shared.jar \
+            "https://repo1.maven.org/maven2/dev/rikka/shizuku/shared/${SHIZUKU_VERSION}/shared-${SHIZUKU_VERSION}.jar"
+          unzip -o shizuku-provider.aar classes.jar -d provider_extracted
+          mv provider_extracted/classes.jar shizuku-provider.jar
+
+      - name: Compile Java sources
+        run: |
+          mkdir -p build/classes
+          find src -name "*.java" > sources.txt
+          javac -source 8 -target 8 \
+            -classpath "$ANDROID_JAR:deps/shizuku-api.jar:deps/shizuku-provider.jar:deps/shizuku-shared.jar" \
+            -d build/classes \
+            @sources.txt
+
+      - name: Merge dependency classes and package classes.jar
+        run: |
+          mkdir -p build/merged
+          cp -r build/classes/* build/merged/
+          cd build/merged
+          jar xf ../../deps/shizuku-api.jar
+          jar xf ../../deps/shizuku-provider.jar
+          jar xf ../../deps/shizuku-shared.jar
+          rm -rf META-INF
+          cd ../..
+          jar cf build/classes.jar -C build/merged .
+
+      - name: Convert to classes.dex with d8
+        run: |
+          "$BT_DIR/d8" --release --output build/ build/classes.jar
+
+      - name: Assemble Sketchware Pro library bundle
+        run: |
+          mkdir -p "out/${LIB_NAME} library"
+          cp build/classes.jar "out/${LIB_NAME} library/classes.jar"
+          cp build/classes.dex "out/${LIB_NAME} library/classes.dex"
+          cp "library-meta/ShizukuRistruct_13_6_2_component.json" "out/${LIB_NAME} library/ShizukuRistruct 13.6.2 component.json"
+          cp "library-meta/shizuku_13_6_2_extended.json" "out/${LIB_NAME} library/shizuku 13.6.2.json"
+          cd out
+          zip -r "../${LIB_NAME} library.zip" "${LIB_NAME} library"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shizuku-sketchware-library
+          path: "${{ env.LIB_NAME }} library.zip"

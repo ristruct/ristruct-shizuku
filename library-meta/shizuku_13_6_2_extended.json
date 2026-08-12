@@ -1,0 +1,462 @@
+[
+  {
+    "code": "",
+    "imports": "",
+    "color": "#C62828",
+    "name": "Shizuku Master Blocks",
+    "typeName": "",
+    "palette": "9",
+    "type": "h",
+    "spec": "Shizuku Master 13.6.2 ------> Android Sketchware Master"
+  },
+  {
+    "code": "/*AXAVajPNTpbJjsz-NGVTp08YDzfI-04kA7ZsuCl4GHqTQQiuWL45sV6Vf4gwK\n>[\"package\"]\n>0\n>0\n>0\n>add\n>AndroidManifest.xml\n    <queries>\n        <package android:name=\"moe.shizuku.privileged.api\" />\n    </queries>\n    <!-- পুরোনো Android (SDK < 30) এর জন্য -->\n<uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />\n<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />\n\n<!-- Android 11 (SDK 30) এবং তার পরের জন্য -->\n<uses-permission android:name=\"android.permission.MANAGE_EXTERNAL_STORAGE\" />\n\n<!-- ADB এর মাধ্যমে Shizuku চালাতে হলে -->\n<uses-permission android:name=\"android.permission.INTERNET\" />\n<uses-permission android:name=\"android.permission.FOREGROUND_SERVICE\" />\n\n<!-- Shizuku কে binder permission চেক করতে দিতে হলে -->\n<uses-permission android:name=\"moe.shizuku.manager.permission.API\" />\n\n<!-- Android 13+ (optional) -->\n<uses-permission android:name=\"android.permission.POST_NOTIFICATIONS\" />\n\r\n\t<uses-permission android:name=\"moe.shizuku.manager.permission.API_V23\" />\r\n\t<uses-permission android:name=\"android.permission.FOREGROUND_SERVICE\" />\nUi5_PNTJb21WO6OuGwQ3psk3su1LIvyXo_OAol-kVQBC5jtN_DcPLaRCJ0yXp*/\n\n/*-JX4UA2y_f1OckjjvxWI.bQwRei-sLEsBmds7ArsRfi0xSFEP3Php97kjdMCs5ed\n>[\"public class\"]\n>0\n>0\n>0\n>find-replace-first\nimport android.Manifest;\nimport android.content.pm.PackageManager;\nimport android.os.Build;\nimport android.widget.Toast;\nimport android.os.AsyncTask;\nimport android.os.Environment;\nimport java.io.File;\nimport java.io.FileOutputStream;\nimport java.io.FileInputStream;\nimport android.os.Handler;\nimport android.os.Looper;\n\nimport rikka.shizuku.Shizuku;\nimport android.content.pm.PackageManager;\r\nimport android.content.pm.PackageInfo;\nimport android.content.pm.PackageManager;\nimport android.content.pm.PackageManager.NameNotFoundException;\nimport android.content.Intent; \nimport android.content.pm.PackageManager; import android.net.Uri; \nimport android.widget.Toast;\nimport android.provider.Settings;\n\npublic class\nBpWI8U4flOpx8Ke66QTlZYBA_NEusQ7BN-D0wvZs7ArsRfi0.EP3Php97kjdMCs*/\n\n\n/*AXAVajPNTpbJjsz-NGVTp08YDzfI-04kA7ZsuCl4GHqTQQiuWL45sV6Vf4gwK\n>[\"android:required=\\\"false\\\" />\"]\n>0\n>0\n>0\n>add\n>AndroidManifest.xml\n<provider\n            android:name=\"rikka.shizuku.ShizukuProvider\"\n            android:authorities=\"%1$s.shizuku\"\n            android:multiprocess=\"false\"\n            android:enabled=\"true\"\n            android:exported=\"true\"\n            android:permission=\"android.permission.INTERACT_ACROSS_USERS_FULL\" />\n            \n            <meta-data\n            android:name=\"moe.shizuku.client.V3_SUPPORT\"\n            android:value=\"true\" />\nUi5_PNTJb21WO6OuGwQ3psk3su1LIvyXo_OAol-kVQBC5jtN_DcPLaRCJ0yXp*/\n\n/*\n<provider\n    android:name=\"rikka.shizuku.ShizukuProvider\"\n    android:authorities=\"${applicationId}.shizuku\"\n    android:multiprocess=\"false\"\n    android:enabled=\"true\"\n    android:exported=\"true\"\n    android:permission=\"android.permission.INTERACT_ACROSS_USERS_FULL\" />\n\n<!-- android:permission=\"android.permission.INTERACT_ACROSS_USERS_FULL\" is to protect this provider from accessing by normal apps -->\n*/",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku constructor_copy45",
+    "typeName": "",
+    "palette": "9",
+    "type": " ",
+    "spec": "oncreate provider set package %s.inputOnly "
+  },
+  {
+    "code": "%1$s = new ShizukuRistruct(%2$s.this);",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku constructor_activity",
+    "typeName": "",
+    "palette": "9",
+    "type": " ",
+    "spec": "%m.ShizukuRistruct with activity %m.activity - create a new ShizukuRistruct instance"
+  },
+  {
+    "code": "%1$s = new ShizukuRistruct(getApplicationContext());",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku constructor",
+    "typeName": "",
+    "palette": "9",
+    "type": " ",
+    "spec": "%m.ShizukuRistruct Constructor - create a new ShizukuRistruct instance"
+  },
+  {
+    "code": "%1$s.unzipWithPassword(%2$s, %3$s, %4$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_unzip_password",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Unzip %s to %s with password %s"
+  },
+  {
+    "code": "",
+    "imports": "",
+    "color": "#FFC2185B",
+    "name": "storage_permission_header",
+    "typeName": "",
+    "palette": "9",
+    "type": "h",
+    "spec": "Storage Permission ------>"
+  },
+  {
+    "code": "%1$s.needsStoragePermission()",
+    "imports": "",
+    "color": "#B71C1C",
+    "name": "needs_storage_permission",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if storage permission is needed (Android 10 and below)"
+  },
+  {
+    "code": "",
+    "imports": "",
+    "color": "#FFC2185B",
+    "name": "shizuku_permission_header",
+    "typeName": "",
+    "palette": "9",
+    "type": "h",
+    "spec": "Shizuku Permission & Status ---->"
+  },
+  {
+    "code": "%1$s.ensureShizukuReady()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_ensure_ready",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if Shizuku is ready (all checks included)"
+  },
+  {
+    "code": "%1$s.hasPermission()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_has_permission",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if Shizuku permission is granted"
+  },
+  {
+    "code": "%1$s.requestPermission();",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_request_permission",
+    "typeName": "",
+    "palette": "9",
+    "type": " ",
+    "spec": "%m.ShizukuRistruct Request Shizuku permission from user"
+  },
+  {
+    "code": "%1$s.destroy();",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_destroy",
+    "typeName": "",
+    "palette": "9",
+    "type": " ",
+    "spec": "%m.ShizukuRistruct Destroy and release Shizuku resources"
+  },
+  {
+    "code": "%1$s.isShizukuAvailable()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_is_available",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if Shizuku service is available/running"
+  },
+  {
+    "code": "%1$s.isShizukuInstalled()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_is_installed",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if Shizuku app is installed"
+  },
+  {
+    "code": "%1$s.openShizukuApp();",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_open_app",
+    "typeName": "",
+    "palette": "9",
+    "type": " ",
+    "spec": "%m.ShizukuRistruct Open Shizuku app or Play Store if not installed"
+  },
+  {
+    "code": "%1$s.openShizukuChooser();",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_open_chooser",
+    "typeName": "",
+    "palette": "9",
+    "type": " ",
+    "spec": "%m.ShizukuRistruct Open Shizuku app with chooser dialog"
+  },
+  {
+    "code": "%1$s.getShizukuMode()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_get_mode",
+    "typeName": "",
+    "palette": "9",
+    "type": "s",
+    "spec": "%m.ShizukuRistruct Get Shizuku running mode (Root/ADB/Unknown)"
+  },
+  {
+    "code": "%1$s.isDeveloperModeEnabled()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_is_developer_mode",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if developer mode is enabled on device"
+  },
+  {
+    "code": "%1$s.isAdbEnabled()",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_is_adb_enabled",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if ADB/Wireless debugging is enabled"
+  },
+  {
+    "code": "",
+    "imports": "",
+    "color": "#FFC2185B",
+    "name": "asset_operations_header",
+    "typeName": "",
+    "palette": "9",
+    "type": "h",
+    "spec": "Asset Operations ------>"
+  },
+  {
+    "code": "%1$s.copyAssetSmart(%2$s, %3$s)",
+    "imports": "",
+    "color": "#FFC2185B",
+    "name": "copy_asset_smart",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Smart copy asset %s to path %s (auto chooses method)"
+  },
+  {
+    "code": "%1$s.copyAndUnzipAssetSmart(%2$s, %3$s)",
+    "imports": "",
+    "color": "#FFC2185B",
+    "name": "copy_unzip_asset_smart",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Smart copy and unzip asset %s to path %s"
+  },
+  {
+    "code": "",
+    "imports": "",
+    "color": "#FFC2185B",
+    "name": "file_operations_header",
+    "typeName": "",
+    "palette": "9",
+    "type": "h",
+    "spec": "File & Directory Operations ------>"
+  },
+  {
+    "code": "%1$s.execCommandBool(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "exec_command_bool",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Execute shell command %s and return success status"
+  },
+  {
+    "code": "%1$s.delete(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_delete",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Delete file or folder at path %s"
+  },
+  {
+    "code": "%1$s.move(%2$s, %3$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_move",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Move file/folder from %s to %s"
+  },
+  {
+    "code": "%1$s.copy(%2$s, %3$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_copy",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Copy file/folder from %s to %s"
+  },
+  {
+    "code": "%1$s.mkdir(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_mkdir",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Create directory at path %s"
+  },
+  {
+    "code": "%1$s.touch(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_touch",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Create empty file at path %s"
+  },
+  {
+    "code": "%1$s.chmod(%2$s, %3$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_chmod",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Set permissions %s for path %s"
+  },
+  {
+    "code": "%1$s.chown(%2$s, %3$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_chown",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Change owner to %s for path %s"
+  },
+  {
+    "code": "%1$s.rename(%2$s, %3$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_rename",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Rename file/folder from %s to %s"
+  },
+  {
+    "code": "%1$s.fileExists(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_file_exists",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if file/folder exists at %s"
+  },
+  {
+    "code": "%1$s.isDirectory(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_is_directory",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Check if path %s is a directory"
+  },
+  {
+    "code": "%1$s.execCommand(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_exec_command",
+    "typeName": "",
+    "palette": "9",
+    "type": "s",
+    "spec": "%m.ShizukuRistruct Execute shell command %s and return output"
+  },
+  {
+    "code": "%1$s.readFile(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_read_file",
+    "typeName": "",
+    "palette": "9",
+    "type": "s",
+    "spec": "%m.ShizukuRistruct Read file content from path %s"
+  },
+  {
+    "code": "%1$s.writeFile(%2$s, %3$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_write_file",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Write content %s to file at path %s"
+  },
+  {
+    "code": "%1$s.getFilePermissions(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_get_permissions",
+    "typeName": "",
+    "palette": "9",
+    "type": "s",
+    "spec": "%m.ShizukuRistruct Get file permissions of path %s"
+  },
+  {
+    "code": "%1$s.getFileOwner(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_get_owner",
+    "typeName": "",
+    "palette": "9",
+    "type": "s",
+    "spec": "%m.ShizukuRistruct Get file owner of path %s"
+  },
+  {
+    "code": "%1$s.getFileSize(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_get_size",
+    "typeName": "",
+    "palette": "9",
+    "type": "s",
+    "spec": "%m.ShizukuRistruct Get file size of path %s"
+  },
+  {
+    "code": "%1$s.zip(%2$s, %3$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_zip",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Zip folder/file at %s to zip file %s"
+  },
+  {
+    "code": "%1$s.unzip(%2$s, %3$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_unzip",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Unzip file at %s to folder %s"
+  },
+  {
+    "code": "%1$s.zipWithPassword(%2$s, %3$s, %4$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "shizuku_zip_password",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Zip %s to %s with password %s"
+  },
+  {
+    "code": "",
+    "imports": "",
+    "color": "#C62828",
+    "name": "Package Management Header",
+    "typeName": "",
+    "palette": "9",
+    "type": "h",
+    "spec": "Package Management ------>"
+  },
+  {
+    "code": "%1$s.installApk(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "install_apk",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Install APK at path %s"
+  },
+  {
+    "code": "%1$s.uninstallPackage(%2$s)",
+    "imports": "",
+    "color": "#C62828",
+    "name": "uninstall_package",
+    "typeName": "",
+    "palette": "9",
+    "type": "b",
+    "spec": "%m.ShizukuRistruct Uninstall package %s"
+  }
+]
