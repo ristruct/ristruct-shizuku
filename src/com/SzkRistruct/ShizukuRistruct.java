@@ -70,24 +70,63 @@ public class ShizukuRistruct {
         }
     }
 
-    public void requestPermission() {
-        try {
-            if (!isShizukuAvailable()) {
-                openShizukuApp();
-                return;
-            }
-            if (Shizuku.isPreV11() || hasPermission()) return;
-            Shizuku.requestPermission(REQUEST_CODE);
-        } catch (Throwable t) {
-            if (activity != null) {
-                Toast.makeText(activity, "Shizuku permission request failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+    private void toast(String message) {
+        if (activity != null) {
+            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
         }
     }
 
-    /** All-in-one readiness check: app installed, service running, permission granted. */
+    /**
+     * Requests the Shizuku permission dialog. Matches ShizukuMaster's behavior:
+     * only ever shows a Toast telling the user what's wrong - it never launches
+     * the Shizuku app on its own. Use openShizukuApp() explicitly if you want
+     * that (e.g. from a button the user taps after reading the toast).
+     */
+    public void requestPermission() {
+        try {
+            if (!isShizukuAvailable()) {
+                toast("shizuku not work.");
+                return;
+            }
+            if (Shizuku.isPreV11() || hasPermission()) {
+                toast("shizuku is running.");
+                return;
+            }
+            Shizuku.requestPermission(REQUEST_CODE);
+        } catch (Throwable t) {
+            toast("Shizuku permission request failed: " + t.getMessage());
+        }
+    }
+
+    /**
+     * All-in-one readiness check: app installed, dev options on, ADB/wireless
+     * debugging on, service running, permission granted. Shows a Toast at the
+     * first failing step (same check order and messages as ShizukuMaster) and
+     * never launches the Shizuku app automatically.
+     */
     public boolean ensureShizukuReady() {
-        return isShizukuInstalled() && isShizukuAvailable() && hasPermission();
+        if (!isShizukuInstalled()) {
+            toast("Shizuku is not installed");
+            return false;
+        }
+        if (!isDeveloperModeEnabled()) {
+            toast("Developer options are disabled");
+            return false;
+        }
+        if (!isAdbEnabled()) {
+            toast("ADB/Wireless debugging is disabled");
+            return false;
+        }
+        if (!isShizukuAvailable()) {
+            toast("shizuku not work.");
+            return false;
+        }
+        if (!hasPermission()) {
+            requestPermission();
+            return false;
+        }
+        toast("shizuku is running.");
+        return true;
     }
 
     /** True once the user has answered the Shizuku permission dialog at least once this run. */
