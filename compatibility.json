@@ -1,12 +1,20 @@
 {
-  "libraryVersion": "1.0.0",
+  "library": "RistructShizuku",
+  "version": "1.0.0",
   "minApi": 24,
-  "targetApi": 36,
-  "shizukuApi": "13.1.5",
+  "compileSdk": 36,
+  "targetSdk": 36,
   "testedApis": [],
+  "supportedApis": [24,25,26,27,28,29,30,31,32,33,34,35,36],
+  "javaSource": "8",
+  "javaTarget": "8",
+  "kotlinConsumerCompatible": true,
+  "requiresShizuku": true,
+  "rootOptional": true,
+  "adbBackendSupported": true,
   "notes": [
-    "Build targets Android API 36.",
-    "Physical-device compatibility must be validated on the target Sketchware Pro fork.",
-    "Shizuku ADB mode is not root and cannot access arbitrary private app data."
+    "ADB/Shell is not root and remains subject to Android security restrictions.",
+    "Physical-device test results are recorded only after actual device testing.",
+    "Future Android releases require compatibility verification."
   ]
 }

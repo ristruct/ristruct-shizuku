@@ -43,3 +43,27 @@ RistructShizuku/
 RistructShizuku does not grant root by itself. In ADB mode the effective UID is normally 2000; root mode is UID 0. Android storage and SELinux restrictions still apply.
 
 The library does not implement Google Play Games login, token handling, server bypasses, anti-cheat bypasses, or cloud-save spoofing.
+
+
+## Sketchware package format
+
+The release workflow creates a Sketchware-style package containing exactly:
+
+```text
+RistructShizuku/
+├── res/
+├── AndroidManifest.xml
+├── classes.dex
+├── classes.jar
+└── config
+```
+
+`config` contains `com.RistructShizuku`, matching the library format supplied as the reference. The package also bundles the required Shizuku API/provider/runtime classes so the consumer can call `RistructShizuku.*` from Sketchware Pro `Add source directly` without declaring a Maven dependency.
+
+## Kotlin compatibility
+
+The public API is written in Java with static methods and ordinary interfaces, so Kotlin consumers can call it directly. No Kotlin runtime is required by the library itself.
+
+## Support policy
+
+The project targets Android API 24-36. No Android library can honestly guarantee compatibility with every future Android release forever. Compatibility is tested per release and recorded in `compatibility.json`.
