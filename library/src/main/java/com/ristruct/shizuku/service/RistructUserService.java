@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class RistructUserService extends IRistructUserService.Stub {
 
-    private static final int DESTROY_TRANSACTION = 16777115;
+    private static final int DESTROY_TRANSACTION = 16777114;
 
     public RistructUserService() {
     }
@@ -96,8 +96,12 @@ public final class RistructUserService extends IRistructUserService.Stub {
                 }
             }
 
-            stdoutThread.join(1500L);
-            stderrThread.join(1500L);
+            try {
+                stdoutThread.join(1500L);
+                stderrThread.join(1500L);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
             out.putBoolean("success", !timedOut && exitCode == 0);
             out.putInt("exitCode", exitCode);
