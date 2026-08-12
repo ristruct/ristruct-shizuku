@@ -3,7 +3,7 @@ set -euo pipefail
 
 VERSION="13.1.5"
 ANNOTATION_VERSION="1.3.0"
-OUT_ROOT="dist"
+OUT_ROOT="$(pwd)/dist"
 OUT="$OUT_ROOT/RistructShizuku"
 WORK="$OUT_ROOT/.work"
 
