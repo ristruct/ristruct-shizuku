@@ -45,7 +45,7 @@ unzip -q -o "$WORK/ours/classes.jar" -d "$WORK/classes-fat"
 rm -rf "$WORK/classes-fat/META-INF"
 (cd "$WORK/classes-fat" && jar cf "$OUT/classes.jar" .)
 
-ANDROID_JAR="$ANDROID_HOME/platforms/android-36/android.jar"
+ANDROID_JAR="$ANDROID_HOME/platforms/android-34/android.jar"
 D8="$ANDROID_HOME/build-tools/35.0.0/d8"
 mkdir -p "$WORK/dex"
 "$D8" --lib "$ANDROID_JAR" --min-api 24 --output "$WORK/dex" "$OUT/classes.jar"
