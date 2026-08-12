@@ -1,0 +1,38 @@
+name: Release
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.11.1'
+      - name: Build
+        run: gradle clean test lint assembleRelease
+      - name: Build Sketchware package
+        run: bash scripts/export-sketchware.sh
+      - name: Checksum
+        run: sha256sum dist/RistructShizuku.zip dist/RistructShizuku/RistructShizuku.aar > dist/checksums.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RistructShizuku-Sketchware
+          path: dist/**
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/RistructShizuku.zip
+            dist/RistructShizuku/RistructShizuku.aar
+            dist/checksums.txt

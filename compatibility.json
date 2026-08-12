@@ -1,0 +1,12 @@
+{
+  "libraryVersion": "1.0.0",
+  "minApi": 24,
+  "targetApi": 36,
+  "shizukuApi": "13.1.5",
+  "testedApis": [],
+  "notes": [
+    "Build targets Android API 36.",
+    "Physical-device compatibility must be validated on the target Sketchware Pro fork.",
+    "Shizuku ADB mode is not root and cannot access arbitrary private app data."
+  ]
+}
