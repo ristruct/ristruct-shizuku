@@ -8,5 +8,5 @@ interface IRistructUserService {
      */
     void destroy() = 16777114;
 
-    Bundle execute(String command, long timeoutMs);
+    Bundle execute(String command, long timeoutMs) = 1;
 }
