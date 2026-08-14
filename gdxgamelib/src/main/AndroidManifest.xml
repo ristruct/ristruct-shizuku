@@ -1,0 +1,13 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        This is a LIBRARY manifest. When you import the resulting .aar as a
+        Local Library in Sketchware Pro, also add the following inside your
+        app's own AndroidManifest (Sketchware Pro: Project -> AndroidManifest.xml editor):
+
+        <activity
+            android:name="com.sketchgdx.gamelib.GdxGameActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape"
+            android:exported="false" />
+    -->
+</manifest>
