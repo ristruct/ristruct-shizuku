@@ -1,6 +1,10 @@
 buildscript {
     repositories {
         google()
+        // repo.maven.apache.org (what mavenCentral() resolves to) has been
+        // intermittently returning 403 Forbidden to GitHub Actions runner
+        // IPs. Pointing straight at the repo1 mirror avoids that CDN edge.
+        maven { url 'https://repo1.maven.org/maven2' }
         mavenCentral()
         gradlePluginPortal()
         maven {
@@ -21,6 +25,7 @@ buildscript {
 allprojects {
     repositories {
         google()
+        maven { url 'https://repo1.maven.org/maven2' }
         mavenCentral()
         maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     }
