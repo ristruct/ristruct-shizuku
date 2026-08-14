@@ -61,10 +61,39 @@ dependency จาก Maven ให้ ดังนั้นคลาสของ 
 เข้าไปในไฟล์ `.aar` ก้อนเดียวตั้งแต่ตอน build เลย — นี่คือสิ่งที่
 `gdxgamelib/build.gradle` ทำผ่านปลั๊กอิน `fat-aar` + task `copyAndroidNatives`
 
+## รองรับ Kotlin ด้วยไหม
+รองรับครับ ตัว `.aar` เป็น Java bytecode ธรรมดา ซึ่ง Kotlin เรียกใช้ได้ตรงๆ
+โดยไม่ต้องแปลงอะไรเพิ่ม (Java <-> Kotlin interop มาตรฐาน) — แต่ Sketchware Pro
+ต้องเป็นรุ่น **`-minApi26`** (รองรับ Android 8+) เท่านั้นถึงจะมีตัวเลือก
+"เพิ่มไฟล์ Kotlin" ในหน้า Java/Kotlin Manager (รุ่น `-minApi21` ยังไม่มี Kotlin)
+ดูตัวอย่างที่ `gdxgamelib-examples/KotlinGame.kt` — เป็นคลาส Kotlin ที่
+extends `BaseGame` (Java) ตรงๆ
+
+## รองรับ Android เวอร์ชันไหนบ้าง
+`minSdk 24` (Android 7.0 ขึ้นไป) ตามที่ขอ — ใช้ได้ทั้งกับ Sketchware Pro
+รุ่น `-minApi26` (มี Kotlin) และ `-minApi21` (Java อย่างเดียว) ได้ทั้งคู่
+ขอแค่ตัวโปรเจกต์แอปของคุณใน Sketchware Pro ตั้ง minSdk ไว้ที่ 24 ขึ้นไปด้วย
+(ตั้งได้ที่ Project > Advanced version control หรือ Manifest editor)
+
+## แก้ปัญหาที่เจอจากรอบก่อน (fat-aar ใช้กับ AGP 8 ไม่ได้)
+ปลั๊กอิน `fat-aar` ตัวต้นฉบับ (kezong 1.3.8) ใช้ API ที่ **ถูกถอดออกไปตั้งแต่
+AGP 8.0** ทำให้ build fail แน่นอนถ้าใช้กับ Android Gradle Plugin 8.1.4 แบบที่
+โปรเจกต์นี้ตั้งไว้ — เปลี่ยนไปใช้ฟอร์ก `com.github.aasitnikov:fat-aar-android:1.4.1`
+แล้วแทน (รองรับ AGP 8.5 / Gradle 8.7 ที่ยืนยันจากผู้ดูแลฟอร์กเอง) ปัญหานี้แก้ให้
+แล้วในไฟล์ `build.gradle` (root และ `gdxgamelib/build.gradle`)
+
+นอกจากนี้ยังเพิ่ม `consumer-rules.pro` (keep rule กันคลาส libGDX โดน proguard/
+minify ตัดทิ้งตอน export APK/AAB จริง) ไว้ในตัว AAR ให้อัตโนมัติด้วย
+
 ## หมายเหตุ
-- โปรเจกต์นี้ตั้งค่า `compileSdk 34`, `minSdk 21`, Android Gradle Plugin 8.1.4
-  ซึ่งตรงกับช่วงที่ Sketchware Pro เวอร์ชันปัจจุบันรองรับ ถ้า Sketchware Pro ของ
-  คุณ build ด้วย AGP คนละเวอร์ชัน ปรับเลขใน `build.gradle` (root) ให้ตรงกันได้
+- โปรเจกต์นี้ตั้งค่า `compileSdk 34`, `minSdk 24`, Android Gradle Plugin 8.1.4
+  ถ้า Sketchware Pro ของคุณ build ด้วย AGP คนละเวอร์ชัน ปรับเลขใน `build.gradle`
+  (root) ให้ตรงกันได้
+- Workflow ตอนนี้มีขั้นตอน "Sanity-check AAR contents" เพิ่มมาแล้ว — มันจะแตก
+  ไฟล์ .aar ที่ build ได้ออกมาดูเองใน log ของ Actions ว่ามี `jni/` ครบ 4 ABI
+  และ `classes.jar` มีคลาส `com.badlogic.gdx.*` อยู่จริงไหม ถ้าขั้นตอนนี้ผ่าน
+  แปลว่า AAR ที่ได้ครบสมบูรณ์แน่นอนก่อนที่คุณจะโหลดไปใช้
 - ผมไม่มี Android SDK / Google Maven ในแซนด์บ็อกซ์ที่ใช้เขียนโค้ดนี้ให้ จึงยัง
-  ไม่ได้คอมไพล์ทดสอบจริง — ให้ GitHub Actions build รอบแรกเป็นตัวเช็ค ถ้า log
-  ฟ้อง error ส่งมาให้ดูได้ จะช่วยไล่แก้ต่อ
+  ไม่ได้รันคอมไพล์จริงด้วยตัวเอง — ให้ GitHub Actions (ซึ่งต่อเน็ตได้เต็มที่)
+  เป็นตัวคอมไพล์และเช็คจริง ถ้ารอบแรก log ฟ้อง error ตรงไหน ส่ง log มาให้ดูได้
+  เลย จะไล่แก้ให้ทันที

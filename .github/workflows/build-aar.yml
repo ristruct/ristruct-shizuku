@@ -28,6 +28,20 @@ jobs:
       - name: Build release AAR
         run: gradle :gdxgamelib:assembleRelease --no-daemon
 
+      - name: Sanity-check AAR contents
+        run: |
+          set -e
+          AAR=$(find gdxgamelib/build/outputs/aar -name "*.aar" | head -n 1)
+          echo "Built: $AAR"
+          mkdir -p /tmp/aar_check
+          unzip -o "$AAR" -d /tmp/aar_check > /dev/null
+          echo "---- AAR top-level contents ----"
+          ls -la /tmp/aar_check
+          echo "---- jni/ (must contain 4 ABI folders with .so files) ----"
+          find /tmp/aar_check/jni -maxdepth 2 || echo "MISSING jni/ !!"
+          echo "---- classes.jar must contain libgdx classes ----"
+          unzip -l /tmp/aar_check/classes.jar | grep -m 5 "com/badlogic/gdx" || echo "MISSING libGDX classes in classes.jar !!"
+
       - name: Upload AAR artifact
         uses: actions/upload-artifact@v4
         with:
