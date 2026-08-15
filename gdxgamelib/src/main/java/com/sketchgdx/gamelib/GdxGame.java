@@ -13,8 +13,16 @@ import com.badlogic.gdx.Game;
  */
 public class GdxGame extends Game {
 
+    /** Set to false once you've confirmed the pipeline works, so real
+     *  players go straight to MenuScreen instead of the diagnostic screen. */
+    public static boolean SHOW_SMOKE_TEST = true;
+
     @Override
     public void create() {
-        setScreen(new MenuScreen(this));
+        if (SHOW_SMOKE_TEST) {
+            setScreen(new SmokeTestScreen(this));
+        } else {
+            setScreen(new MenuScreen(this));
+        }
     }
 }
