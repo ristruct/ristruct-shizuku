@@ -7,11 +7,20 @@
 ## โครงสร้าง
 ```
 gdx-sketchware/
-├── gdxgamelib/                  <- โมดูลไลบรารีที่ build ออกมาเป็น .aar
-│   └── src/main/java/com/sketchgdx/gamelib/
-│       ├── BaseGame.java        <- ตัวอย่างเกม ใช้ AssetManager โหลดรูปจริง
-│       └── GdxGameActivity.java <- Activity ที่ Sketchware Pro เปิดผ่าน Intent
-└── .github/workflows/build-aar.yml   <- GitHub Actions build ให้อัตโนมัติ
+├── gdxgamelib/                        <- โมดูลไลบรารีที่ build ออกมาเป็น .aar
+│   ├── consumer-rules.pro             <- กัน proguard ตัดคลาส libGDX ทิ้ง
+│   └── src/main/
+│       ├── AndroidManifest.xml        <- คำแนะนำการเซ็ตอัปฝั่ง Sketchware Pro
+│       ├── assets/badlogic.jpg        <- รูปตัวอย่าง (ฝังมากับ .aar อัตโนมัติ)
+│       └── java/com/sketchgdx/gamelib/
+│           ├── GdxGame.java           <- entry point (Game), setScreen(...)
+│           ├── MenuScreen.java        <- ตัวอย่างเมนู
+│           ├── PlayScreen2D.java      <- ตัวอย่าง gameplay 2D
+│           ├── PlayScreen3D.java      <- ตัวอย่าง gameplay 3D
+│           ├── BaseGame.java          <- เดโมสั้นๆ แบบคลาสเดียว (ทางเลือก)
+│           └── GdxGameActivity.java   <- Activity ที่ Sketchware Pro เปิดผ่าน Intent
+├── gdxgamelib-examples/KotlinGame.kt  <- ตัวอย่างเขียนเกมด้วย Kotlin
+└── .github/workflows/build-aar.yml    <- GitHub Actions build ให้อัตโนมัติ
 ```
 
 ## ขั้นตอนที่ 1: ให้ GitHub Actions build ไฟล์ .aar ให้
@@ -28,31 +37,44 @@ gdx-sketchware/
    หน้า Design หรือเมนู 3 จุด แล้วแต่เวอร์ชัน) → **Add Local Library**
 2. เลือกไฟล์ `gdxgamelib-release.aar` ที่ดาวน์โหลดมา
 3. เปิด **AndroidManifest.xml editor** ของโปรเจกต์ แล้วเพิ่ม activity นี้เข้าไป
-   ในแท็ก `<application>`:
+   ในแท็ก `<application>` (Sketchware Pro **ไม่** merge manifest ของ local
+   library ให้อัตโนมัติ ต้องเพิ่มเองครั้งเดียว):
    ```xml
    <activity
        android:name="com.sketchgdx.gamelib.GdxGameActivity"
        android:configChanges="orientation|keyboardHidden|screenSize"
        android:screenOrientation="landscape"
-       android:exported="false" />
+       android:exported="true" />
    ```
-4. (ถ้าอยากเปลี่ยนรูปที่โชว์) เอารูปของคุณไปวางที่ assets ของโปรเจกต์ Sketchware
-   Pro เอง (Project → Assets Manager) เช่น `sprites/player.png`
+4. เอารูป/เสียง/ฟอนต์ของเกมไปวางที่ Assets ของโปรเจกต์ Sketchware Pro เอง
+   (Project → Assets Manager) แล้วเรียกด้วย path ปกติผ่าน `AssetManager`
+   ในโค้ด Java/Kotlin ของคุณ ไม่ต้องตั้งค่าอะไรเพิ่ม
 
-## ขั้นตอนที่ 3: เปิดเกมจากบล็อก
-บนปุ่มใน Sketchware Pro ใช้บล็อก **Intent → Start Activity**:
-- Component: `com.sketchgdx.gamelib.GdxGameActivity`
-- (ถ้าต้องการ) putExtra key `image_path` value `sprites/player.png`
+## ขั้นตอนที่ 3: เปิดเกม (วิธีที่แนะนำ — เสถียรที่สุด)
+เก็บ MainActivity ไว้เป็นหน้าแรกของแอปตามปกติ (อย่าไปแก้ manifest ส่วนนั้น
+เพราะ IDE คุมเองอยู่แล้ว) แล้วใน **MainActivity → onCreate** ใส่ 2 บล็อก:
+1. **Intent → Start Activity**, component: `com.sketchgdx.gamelib.GdxGameActivity`
+2. **Activity → Finish Activity**
 
-ถ้าอยากรับผลลัพธ์กลับ (เช่นคะแนน) ใช้ **Start Activity for Result** แทน แล้วรับค่า
-ใน `onActivityResult` โดยอ่าน extra key `score` — ฝั่งเกมเรียก
-`finishWithScore(int)` ใน `GdxGameActivity` เมื่อจบเกม
+แค่นี้แอปจะบูตแล้วสลับเข้าเกมทันทีในเฟรมเดียว ไม่กระพริบ ไม่ต้องแตะ manifest
+ส่วนที่ IDE ดูแลเอง — ทางเลือกอื่น (ตั้ง GdxGameActivity เป็น LAUNCHER ตรงๆ)
+ก็ทำได้เหมือนกัน แต่เสี่ยงกว่าเพราะ Sketchware Pro บาง build อาจ regenerate
+ส่วนนั้นทับ ดูรายละเอียดทั้งสองแบบได้ในคอมเมนต์ของ `AndroidManifest.xml`
+
+ถ้าอยากรับผลลัพธ์กลับ (เช่นคะแนน) ใช้ **Start Activity for Result** แทนใน
+ขั้นตอนที่ 1 แล้วรับค่าใน `onActivityResult` โดยอ่าน extra key `score` —
+ฝั่งเกมเรียก `finishWithScore(int)` ใน `GdxGameActivity` เมื่อจบเกม
 
 ## ขยายเป็นเกมจริงของคุณ
-แก้ `BaseGame.java` (หรือสร้างคลาสใหม่ extends `ApplicationAdapter`) แล้วโหลด
-asset ผ่าน `AssetManager` ตามปกติของ libGDX — path จะอ้างอิงจากโฟลเดอร์
+วิธีหลัก (แนะนำ): เพิ่มคลาสใหม่ `implements Screen` วางไว้โฟลเดอร์เดียวกับ
+`MenuScreen`/`PlayScreen2D` แล้วสลับไปด้วย `game.setScreen(new YourScreen(...))`
+โหลด asset ผ่าน `AssetManager` ตามปกติของ libGDX — path อ้างอิงจากโฟลเดอร์
 `assets/` ของแอป (โฟลเดอร์เดียวกับที่ Sketchware Pro มี Assets Manager ให้)
 ไม่ต้องตั้งค่าอะไรเพิ่ม
+
+วิธีเร็ว/ทดสอบสั้นๆ: แก้ `BaseGame.java` (extends `ApplicationAdapter` คลาส
+เดียวจบ ไม่มีระบบสลับหน้าจอ) แล้วสลับ `GdxGameActivity` ให้ `initialize(new BaseGame(), config)`
+แทน `new GdxGame()`
 
 ## ทำไมต้องมี fat-aar / copyAndroidNatives
 Sketchware Pro import Local Library แบบ `.aar` ตรงๆ โดยไม่ไปไล่ resolve
@@ -84,6 +106,19 @@ AGP 8.0** ทำให้ build fail แน่นอนถ้าใช้กั�
 
 นอกจากนี้ยังเพิ่ม `consumer-rules.pro` (keep rule กันคลาส libGDX โดน proguard/
 minify ตัดทิ้งตอน export APK/AAB จริง) ไว้ในตัว AAR ให้อัตโนมัติด้วย
+
+## เขียนเกมล้วนด้วยโค้ด (แทบไม่ใช้บล็อกเลย)
+โครง `gdxgamelib` ตอนนี้ใช้แพทเทิร์นมาตรฐานของ libGDX คือ `Game` + `Screen`
+แทนคลาสเดียวทำทุกอย่าง:
+- `GdxGame.java` — entry point, สลับหน้าจอด้วย `setScreen(...)`
+- `MenuScreen.java` — ตัวอย่างเมนู แตะจอเพื่อเริ่ม
+- `PlayScreen2D.java` — ตัวอย่าง 2D ขยับสไปรท์ด้วยปุ่มลูกศร/แตะจอ
+- `PlayScreen3D.java` — ตัวอย่าง 3D กล่องหมุน (ไม่ต้องมีไฟล์โมเดลเพิ่ม)
+
+สร้างเกมจริงโดยเพิ่มคลาส `implements Screen` ของคุณเอง วางไว้โฟลเดอร์เดียวกัน
+แล้ว `game.setScreen(new YourScreen(...))` จากหน้าจอไหนก็ได้ — ทั้งหมดนี้เป็น
+Java class ล้วน ไม่เกี่ยวกับบล็อกของ Sketchware Pro เลย (จะเขียนเป็น Kotlin
+แทนก็ได้ตามที่คุยไว้ก่อนหน้า — ดู `gdxgamelib-examples/KotlinGame.kt`)
 
 ## หมายเหตุ
 - โปรเจกต์นี้ตั้งค่า `compileSdk 34`, `minSdk 24`, Android Gradle Plugin 8.1.4

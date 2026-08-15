@@ -13,38 +13,38 @@ import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
  * itself, so this class -- shipped inside gdxgamelib.aar -- IS the Activity;
  * you only reference its class name from blocks.
  *
- * In Sketchware Pro:
+ * Recommended setup (most stable — doesn't touch the manifest sections
+ * Sketchware Pro's IDE regenerates on its own):
  *   1. Import Library -> Local Library -> gdxgamelib.aar
- *   2. Add the <activity> entry shown in AndroidManifest.xml (this module)
- *      into your project's AndroidManifest via the Manifest editor.
- *   3. On a Button click block: More Block -> Intent -> "Start Activity" ->
- *      set component to "com.sketchgdx.gamelib.GdxGameActivity" and, if you
- *      want to change the image, putExtra("image_path", "sprites/player.png").
- *   4. When the game finishes (back button), it calls finish() and, if it
- *      was started with startActivityForResult, returns RESULT_OK with the
- *      "score" extra so your block screen can read it in onActivityResult.
+ *   2. Manifest editor -> add the <activity> entry from this module's
+ *      AndroidManifest.xml (leave MainActivity's own LAUNCHER entry as-is).
+ *   3. In MainActivity's onCreate event: add block Intent -> "Start Activity"
+ *      with component "com.sketchgdx.gamelib.GdxGameActivity", then block
+ *      Activity -> "Finish Activity" right after it. The app still boots
+ *      through Sketchware Pro's own MainActivity (so the IDE never fights
+ *      you over the manifest), it just hands off to the game in the same
+ *      frame, with no visible flicker.
+ *   4. When the game finishes (e.g. a "game over" screen calls
+ *      finishWithScore(...)), it hands RESULT_OK + a "score" extra back to
+ *      whatever screen started it with startActivityForResult.
  */
 public class GdxGameActivity extends AndroidApplication {
 
-    public static final String EXTRA_IMAGE_PATH = "image_path";
     public static final String EXTRA_RESULT_SCORE = "score";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String imagePath = "badlogic.jpg";
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(EXTRA_IMAGE_PATH)) {
-            imagePath = intent.getStringExtra(EXTRA_IMAGE_PATH);
-        }
-
         AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
         config.useAccelerometer = false;
         config.useCompass = false;
         config.useGyroscope = false;
 
-        initialize(new BaseGame(imagePath), config);
+        // GdxGame -> MenuScreen -> PlayScreen2D / PlayScreen3D. Add your own
+        // Screens (levels, pause, game-over, ...) next to those and switch
+        // between them with game.setScreen(...) from within any Screen.
+        initialize(new GdxGame(), config);
     }
 
     /** Call this from your game logic (e.g. a "game over" screen) to close
