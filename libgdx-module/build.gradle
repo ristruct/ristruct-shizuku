@@ -1,0 +1,69 @@
+apply plugin: 'com.android.library'
+
+def gdxVersion = '1.14.2'
+
+android {
+    namespace 'com.ristruct.gdxlib'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 21
+        targetSdk 34
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // We only need the pure-Java/Kotlin classes for the Sketchware Pro
+    // local_libs (classes.jar + classes.dex). Native .so files are handled
+    // separately by the workflow and copied into jniLibs.
+    ndkVersion = ""
+}
+
+dependencies {
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+    // Native shared libraries for every ABI Sketchware Pro / Android needs.
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
+}
+
+configurations { natives }
+
+// Copies native .so files out of the natives configuration into a folder
+// the workflow can zip up separately (for manual placement into jniLibs).
+task copyAndroidNatives {
+    doLast {
+        file("$buildDir/natives/armeabi-v7a").mkdirs()
+        file("$buildDir/natives/arm64-v8a").mkdirs()
+        file("$buildDir/natives/x86").mkdirs()
+        file("$buildDir/natives/x86_64").mkdirs()
+
+        configurations.natives.files.each { jar ->
+            def outputDir = null
+            if (jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("$buildDir/natives/armeabi-v7a")
+            if (jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("$buildDir/natives/arm64-v8a")
+            if (jar.name.endsWith("natives-x86.jar")) outputDir = file("$buildDir/natives/x86")
+            if (jar.name.endsWith("natives-x86_64.jar")) outputDir = file("$buildDir/natives/x86_64")
+            if (outputDir != null) {
+                copy {
+                    from zipTree(jar)
+                    into outputDir
+                    include "*.so"
+                }
+            }
+        }
+    }
+}
+
+// Collects every runtime .jar (our module + gdx + gdx-backend-android) into
+// one folder so the workflow can merge + dex them into a single
+// classes.jar / classes.dex pair for Sketchware Pro's local_libs.
+task collectRuntimeJars(type: Copy) {
+    from configurations.getByName("releaseRuntimeClasspath").filter { it.name.endsWith(".jar") }
+    into "$buildDir/runtime-jars"
+}
