@@ -1,0 +1,85 @@
+// This module deliberately does NOT use the Android Gradle Plugin.
+// LibGDX's Android backend only needs android.jar on the *compile*
+// classpath (for API references) — it doesn't need resource merging,
+// manifest merging, or an APK. Using plain 'java-library' keeps the
+// output layout 100% predictable across AGP versions, which is what
+// we need to reliably produce classes.jar / classes.dex.
+
+plugins {
+    id 'java-library'
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+def androidHome = System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT')
+def androidJar = file("$androidHome/platforms/android-${ANDROID_COMPILE_SDK}/android.jar")
+
+configurations {
+    natives
+}
+
+dependencies {
+    compileOnly files(androidJar)
+
+    implementation "com.badlogicgames.gdx:gdx:$GDX_VERSION"
+    implementation "com.badlogicgames.gdx:gdx-backend-android:$GDX_VERSION"
+
+    // Native .so binaries per ABI — pulled into a separate configuration
+    // so they never end up mixed into classes.jar/classes.dex.
+    natives "com.badlogicgames.gdx:gdx-platform:$GDX_VERSION:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-platform:$GDX_VERSION:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-platform:$GDX_VERSION:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-platform:$GDX_VERSION:natives-x86_64"
+}
+
+// Fat jar: our own compiled classes (none, this module has no .java files
+// of its own) + every runtime dependency jar (gdx core + gdx-backend-android
+// + their transitive deps), flattened into one classes.jar that Sketchware
+// Pro's local_libs can consume directly.
+task fatJar(type: Jar) {
+    archiveBaseName.set('classes')
+    destinationDirectory.set(file("$buildDir/output"))
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from sourceSets.main.output
+    from {
+        configurations.runtimeClasspath
+            .filter { it.name.endsWith('.jar') }
+            .collect { zipTree(it) }
+    }
+
+    // Strip signature files that break re-packaging/re-dexing
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
+}
+
+// Extracts each ABI's .so files into build/output/natives/<abi>/
+task extractNatives {
+    dependsOn configurations.natives
+    doLast {
+        def abiMap = [
+            'natives-armeabi-v7a': 'armeabi-v7a',
+            'natives-arm64-v8a'  : 'arm64-v8a',
+            'natives-x86'        : 'x86',
+            'natives-x86_64'     : 'x86_64'
+        ]
+        configurations.natives.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+            def abi = abiMap[artifact.classifier]
+            if (abi != null) {
+                def outDir = file("$buildDir/output/natives/$abi")
+                outDir.mkdirs()
+                copy {
+                    from zipTree(artifact.file)
+                    into outDir
+                    include '**/*.so'
+                    eachFile { fcd -> fcd.path = fcd.name } // flatten
+                    includeEmptyDirs = false
+                }
+            }
+        }
+    }
+}
+
+task buildLocalLib {
+    dependsOn fatJar, extractNatives
+}

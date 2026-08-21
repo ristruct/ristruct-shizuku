@@ -1,16 +1,24 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.2'
-    }
-}
+// Root build.gradle — no Android Gradle Plugin needed.
+// The androidlib module uses the plain 'java-library' plugin so it compiles
+// against android.jar directly. This avoids AGP version/output-path drift
+// and keeps the build reproducible on GitHub-hosted runners.
 
 allprojects {
     repositories {
         google()
         mavenCentral()
+
+        // --- Mirrors -------------------------------------------------
+        // Google Maven / Maven Central occasionally rate-limit or reset
+        // connections from certain CI IP ranges ("connection reset",
+        // "403", timeouts). These mirrors are tried automatically by
+        // Gradle if the primary repo fails to resolve an artifact.
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://jitpack.io' }
     }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
